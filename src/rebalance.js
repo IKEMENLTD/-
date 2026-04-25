@@ -14,6 +14,7 @@ import {
   swapExactInput,
   mintNewPosition,
   increaseLiquidity,
+  wrapETH,
 } from "./uniswap.js";
 
 const RANGE_WIDTH_PCT = Number(process.env.RANGE_WIDTH_PCT || 15);
@@ -85,7 +86,8 @@ async function main() {
   }
 
   const inRange = position ? isInRange(currentTick, position.tickLower, position.tickUpper) : false;
-  const hasIdleFunds = usdcBal > 1_000_000n || wethBal > ethers.parseEther("0.0005");
+  const ethSpendable = ethBal > GAS_RESERVE_ETH ? ethBal - GAS_RESERVE_ETH : 0n;
+  const hasIdleFunds = usdcBal > 1_000_000n || wethBal > ethers.parseEther("0.0005") || ethSpendable > ethers.parseEther("0.0005");
 
   if (position && inRange && !hasIdleFunds) {
     const msg = `In range, no idle funds. Skip.\nTick: ${currentTick} in [${position.tickLower}, ${position.tickUpper}]`;
@@ -118,12 +120,12 @@ async function main() {
     position = null;
   }
 
-  const usdc1 = await usdc.balanceOf(wallet.address);
-  const weth1 = await weth.balanceOf(wallet.address);
-  const ethSpendable = (await provider.getBalance(wallet.address)) - GAS_RESERVE_ETH;
-
-  if (ethSpendable > ethers.parseEther("0.0005")) {
-    console.log(`[bot] wrapping ${fmtETH(ethSpendable)} ETH... (skipped: handled via WETH only in this MVP)`);
+  const ethBalNow = await provider.getBalance(wallet.address);
+  const ethToWrap = ethBalNow > GAS_RESERVE_ETH ? ethBalNow - GAS_RESERVE_ETH : 0n;
+  if (ethToWrap > ethers.parseEther("0.0005")) {
+    console.log(`[bot] wrapping ${fmtETH(ethToWrap)} ETH -> WETH...`);
+    const wrapHash = await wrapETH(wallet, ethToWrap);
+    txHashes.push(`wrap: ${wrapHash}`);
   }
 
   const wethBalForLP = await weth.balanceOf(wallet.address);

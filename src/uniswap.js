@@ -40,6 +40,26 @@ export const ERC20_ABI = [
   "function allowance(address, address) view returns (uint256)",
 ];
 
+export const WETH_ABI = [
+  "function deposit() external payable",
+  "function withdraw(uint256) external",
+  "function balanceOf(address) view returns (uint256)",
+];
+
+export async function wrapETH(wallet, amount) {
+  const weth = new ethers.Contract(BASE.WETH, WETH_ABI, wallet);
+  const tx = await weth.deposit({ value: amount });
+  const receipt = await tx.wait();
+  return receipt.hash;
+}
+
+export async function unwrapWETH(wallet, amount) {
+  const weth = new ethers.Contract(BASE.WETH, WETH_ABI, wallet);
+  const tx = await weth.withdraw(amount);
+  const receipt = await tx.wait();
+  return receipt.hash;
+}
+
 export const SWAP_ROUTER_ABI = [
   "function exactInputSingle((address tokenIn, address tokenOut, uint24 fee, address recipient, uint256 amountIn, uint256 amountOutMinimum, uint160 sqrtPriceLimitX96)) external payable returns (uint256 amountOut)",
 ];
