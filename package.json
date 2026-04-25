@@ -1,0 +1,17 @@
+{
+  "name": "auto-rebalance",
+  "version": "0.1.0",
+  "description": "Uniswap V3 Base 自動リバランス BOT (GitHub Actions cron)",
+  "type": "module",
+  "main": "src/rebalance.js",
+  "scripts": {
+    "start": "node src/rebalance.js",
+    "dryrun": "DRY_RUN=true node src/rebalance.js"
+  },
+  "dependencies": {
+    "ethers": "^6.13.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

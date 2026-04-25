@@ -1,0 +1,41 @@
+name: Auto Rebalance
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no TX, just simulate)'
+        required: false
+        default: 'false'
+
+jobs:
+  rebalance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run rebalance
+        env:
+          BASE_RPC_URL: ${{ secrets.BASE_RPC_URL }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          TOKEN_ID: ${{ secrets.TOKEN_ID }}
+          CHATWORK_TOKEN: ${{ secrets.CHATWORK_TOKEN }}
+          CHATWORK_ROOM_ID: ${{ secrets.CHATWORK_ROOM_ID }}
+          RANGE_WIDTH_PCT: ${{ vars.RANGE_WIDTH_PCT || '15' }}
+          GAS_RESERVE_ETH: ${{ vars.GAS_RESERVE_ETH || '0.002' }}
+          MIN_REBALANCE_USD: ${{ vars.MIN_REBALANCE_USD || '30' }}
+          NOTIFY_SKIP: ${{ vars.NOTIFY_SKIP || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: npm start
