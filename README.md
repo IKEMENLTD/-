@@ -92,6 +92,20 @@ GitHub の Actions タブ → 「Auto Rebalance」 → 「Run workflow」 → `d
 
 以後は6時間ごとに自動実行。
 
+## コマンド (workflow_dispatch から選択)
+
+GitHub Actions の「Run workflow」で `command` を選んで実行:
+
+| コマンド | 動作 |
+|---|---|
+| `auto` | デフォルト。レンジ判定→必要時リバランス。6時間cronも同じ動作 |
+| `status` | 現在のポジション・残高・価格をChatworkに通知のみ(TX送信なし) |
+| `dry_run` | シミュレーションのみ実行、TX送信なし |
+| `force_rebalance` | レンジ内でも強制的にリバランス実行 |
+| `close_all` | 全ポジション解約してETH/USDCに戻す。WETHは自動unwrap |
+
+cronで自動実行されるときは常に `auto`。手動実行のときだけ他のコマンド選べる。
+
 ## 環境変数(GitHub Variables で上書き可能)
 
 | 変数 | デフォルト | 説明 |

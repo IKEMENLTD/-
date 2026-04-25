@@ -5,10 +5,17 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: 'Dry run (no TX, just simulate)'
-        required: false
-        default: 'false'
+      command:
+        description: 'コマンド選択'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - status
+          - dry_run
+          - force_rebalance
+          - close_all
 
 jobs:
   rebalance:
@@ -36,5 +43,5 @@ jobs:
           GAS_RESERVE_ETH: ${{ vars.GAS_RESERVE_ETH || '0.002' }}
           MIN_REBALANCE_USD: ${{ vars.MIN_REBALANCE_USD || '30' }}
           NOTIFY_SKIP: ${{ vars.NOTIFY_SKIP || 'false' }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          COMMAND: ${{ github.event.inputs.command || 'auto' }}
         run: npm start
